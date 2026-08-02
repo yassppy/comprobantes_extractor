@@ -4,6 +4,7 @@ import streamlit as st
 
 from ui.components.file_selector import render_file_selector
 from ui.components.file_table import render_file_table
+from ui.components.summary_card import render_summary_card
 from ui.components.toolbar import render_toolbar
 from ui.state import AppState
 
@@ -34,6 +35,7 @@ def main() -> None:
         render_file_table()
 
     render_toolbar()
+    render_summary_card()
 
 
 if __name__ == "__main__":

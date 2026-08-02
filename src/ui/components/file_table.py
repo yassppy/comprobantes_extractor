@@ -2,7 +2,18 @@
 
 import streamlit as st
 
+from domain.enums.document_status import DocumentStatus
 from ui.state import AppState
+
+_STATUS_LABEL: dict[DocumentStatus, str] = {
+    DocumentStatus.READY:      "Listo 🟢",
+    DocumentStatus.PENDING:    "Pendiente ⏳",
+    DocumentStatus.PROCESSING: "Procesando 🔄",
+    DocumentStatus.PROCESSED:  "Procesado ✅",
+    DocumentStatus.FAILED:     "Error ❌",
+    DocumentStatus.ERROR:      "Error ❌",
+    DocumentStatus.UNSUPPORTED:"No soportado ⛔",
+}
 
 
 def render_file_table() -> None:
@@ -19,7 +30,7 @@ def render_file_table() -> None:
             st.warning(f"❌ **{filename}**: {error_msg}")
 
     # R1: Mostrar la lista de archivos listos para procesar
-    st.subheader("📄 Comprobantes Listos para Procesar")
+    st.subheader("📄 Comprobantes Seleccionados")
 
     if not valid_docs:
         st.info("No hay ningún comprobante seleccionado actualmente. Selecciona uno o varios archivos arriba para comenzar.")
@@ -27,19 +38,32 @@ def render_file_table() -> None:
 
     table_data = []
     for idx, doc in enumerate(valid_docs, start=1):
+        label = _STATUS_LABEL.get(doc.status, doc.status.value.capitalize())
         table_data.append({
             "#": idx,
             "Nombre del Archivo": doc.name,
             "Tipo": doc.file_type.value.upper() if doc.file_type else "Desconocido",
             "Tamaño": doc.formatted_size,
-            "Estado": "Listo 🟢" if doc.status == "ready" else doc.status.value.capitalize(),
-            "Ruta": str(doc.path)
+            "Estado": label,
+            "Error": doc.error_message or "",
         })
 
     st.dataframe(
         table_data,
         use_container_width=True,
-        hide_index=True
+        hide_index=True,
+        column_config={
+            "Error": st.column_config.TextColumn("Detalle de Error", width="large"),
+        },
     )
 
-    st.caption(f"Total de comprobantes listos: **{len(valid_docs)}**")
+    processed = sum(1 for d in valid_docs if d.status == DocumentStatus.PROCESSED)
+    failed = sum(1 for d in valid_docs if d.status in {DocumentStatus.FAILED, DocumentStatus.ERROR})
+
+    caption_parts = [f"Total: **{len(valid_docs)}**"]
+    if processed:
+        caption_parts.append(f"Procesados: **{processed}**")
+    if failed:
+        caption_parts.append(f"Errores: **{failed}**")
+
+    st.caption("  |  ".join(caption_parts))

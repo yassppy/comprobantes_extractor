@@ -18,6 +18,12 @@ class AppState:
             st.session_state.invalid_files = []
         if "processing_started" not in st.session_state:
             st.session_state.processing_started = False
+        if "batch_summary" not in st.session_state:
+            st.session_state.batch_summary = None
+        if "uploader_reset_key" not in st.session_state:
+            st.session_state.uploader_reset_key = 0
+        if "_clearing" not in st.session_state:
+            st.session_state._clearing = False
 
     @staticmethod
     def update_selection(result: SelectDocumentsResult) -> None:
@@ -27,15 +33,34 @@ class AppState:
         st.session_state.selected_documents = result.valid_documents
         st.session_state.invalid_files = result.invalid_files
         st.session_state.processing_started = False
+        st.session_state.batch_summary = None
 
     @staticmethod
     def clear_selection() -> None:
         """
-        Limpia la selección actual.
+        Limpia la selección actual y resetea el file_uploader.
         """
         st.session_state.selected_documents = []
         st.session_state.invalid_files = []
         st.session_state.processing_started = False
+        st.session_state.batch_summary = None
+        # Cambia la key del file_uploader para forzar su reset visual
+        st.session_state.uploader_reset_key = st.session_state.get("uploader_reset_key", 0) + 1
+        # Marca que se acaba de limpiar para que file_selector no re-cargue
+        st.session_state._clearing = True
+
+    @staticmethod
+    def set_batch_summary(summary) -> None:
+        """
+        Guarda el resumen del procesamiento por lote.
+        """
+        st.session_state.batch_summary = summary
+        st.session_state.processing_started = True
+
+    @classmethod
+    def get_batch_summary(cls):
+        cls.initialize()
+        return st.session_state.batch_summary
 
     @classmethod
     def get_selected_documents(cls) -> list[Document]:
@@ -54,3 +79,12 @@ class AppState:
         """
         cls.initialize()
         return len(st.session_state.selected_documents) > 0
+
+    @classmethod
+    def get_uploader_key(cls) -> str:
+        """
+        Retorna la key dinámica del file_uploader para forzar su reset al limpiar.
+        """
+        cls.initialize()
+        return f"file_uploader_widget_{st.session_state.uploader_reset_key}"
+
