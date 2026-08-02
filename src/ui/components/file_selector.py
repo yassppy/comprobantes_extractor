@@ -22,11 +22,14 @@ def render_file_selector() -> None:
         uploaded_files = st.file_uploader(
             "Selecciona uno o varios comprobantes (PDF, JPG, PNG, JPEG)",
             accept_multiple_files=True,
-            key="file_uploader_widget",
+            key=AppState.get_uploader_key(),
             help="Formatos soportados: PDF, JPG, PNG, JPEG"
         )
 
-        if uploaded_files is not None:
+        # Si se acaba de limpiar, ignoramos lo que devuelve el uploader en este ciclo
+        if st.session_state.get("_clearing", False):
+            st.session_state._clearing = False
+        elif uploaded_files is not None:
             result = use_case.execute_from_uploaded_files(uploaded_files)
             AppState.update_selection(result)
 
