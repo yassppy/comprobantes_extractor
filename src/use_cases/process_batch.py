@@ -8,29 +8,45 @@ from domain.entities.processing_result import BatchProcessSummary, DocumentProce
 from domain.enums.document_status import DocumentStatus
 
 
+def _extract_and_parse(doc: Document) -> None:
+    """
+    Procesador real: extrae texto (REQ-3) y parsea campos (REQ-4).
+    El documento debe tener una ruta válida en disco (path).
+    """
+    from infrastructure.extractor.text_extractor import extract_text
+    from infrastructure.parser.document_parser import parse_document
+
+    if doc.file_type is None:
+        raise ValueError(f"Tipo de archivo no determinado para '{doc.name}'.")
+
+    # REQ-3: extracción de texto según tipo de archivo
+    extraction = extract_text(doc.path, doc.file_type)
+
+    # REQ-4: parseo de campos desde el texto extraído
+    extracted = parse_document(
+        text=extraction.text,
+        document_type=doc.document_type,
+        ocr_engine=extraction.ocr_engine,
+        source_type=extraction.source_type,
+    )
+
+    doc.extracted_data = extracted
+
+
 class ProcessBatchUseCase:
     def __init__(self, single_processor: Callable[[Document], None] | None = None) -> None:
         """
         single_processor: Función o servicio que procesa un comprobante individual.
-        Si es None, ejecuta una simulación/procesamiento por defecto.
+        Por defecto usa el extractor real (pdfplumber / RapidOCR + parseo de campos).
         """
-        self.single_processor = single_processor or self._default_processor
-
-    def _default_processor(self, doc: Document) -> None:
-        """
-        Procesamiento por defecto. Si el nombre del archivo contiene 'error' o 'corrupto', simula una falla.
-        """
-        if "error" in doc.name.lower() or "corrupto" in doc.name.lower():
-            raise ValueError(f"Falla al procesar el contenido de '{doc.name}' (documento ilegible o corrupto).")
-        # Simulación de lectura exitosa
-        time.sleep(0.01)
+        self.single_processor = single_processor or _extract_and_parse
 
     def execute(self, documents: list[Document]) -> BatchProcessSummary:
         """
         Ejecuta el procesamiento por lote sobre todos los comprobantes seleccionados.
         R1: Procesar todos los archivos seleccionados.
-        R2: Si ocurre un error en un comprobante, registrar el error y continuar con los demás.
-        R3: Mostrar resumen con comprobantes procesados, errores y tiempo total.
+        R2: Si ocurre un error en un comprobante, registrar el error y continuar.
+        R3: Retornar resumen con procesados, errores y tiempo total.
         """
         start_time = time.perf_counter()
         summary = BatchProcessSummary(total_count=len(documents))
@@ -48,14 +64,13 @@ class ProcessBatchUseCase:
                 res = DocumentProcessResult(
                     document=doc,
                     success=True,
-                    execution_time_seconds=doc_elapsed
+                    execution_time_seconds=doc_elapsed,
                 )
                 summary.results.append(res)
                 summary.processed_count += 1
 
             except Exception as e:  # noqa: BLE001
-                # R2: Error aislado por comprobante; registra error y continua con los demás
-
+                # R2: error aislado — registra y continúa con los demás
                 doc.status = DocumentStatus.FAILED
                 doc.error_message = str(e)
                 doc_elapsed = time.perf_counter() - doc_start
@@ -64,7 +79,7 @@ class ProcessBatchUseCase:
                     document=doc,
                     success=False,
                     error_message=str(e),
-                    execution_time_seconds=doc_elapsed
+                    execution_time_seconds=doc_elapsed,
                 )
                 summary.results.append(res)
                 summary.error_count += 1
