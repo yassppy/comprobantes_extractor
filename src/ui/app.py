@@ -2,6 +2,7 @@
 
 import streamlit as st
 
+from ui.components.company_manager import render_company_manager
 from ui.components.file_selector import render_file_selector
 from ui.components.file_table import render_file_table
 from ui.components.summary_card import render_summary_card
@@ -14,18 +15,23 @@ def main() -> None:
         page_title="Extractor de Comprobantes",
         page_icon="🧾",
         layout="wide",
-        initial_sidebar_state="expanded"
+        initial_sidebar_state="expanded",
     )
 
     AppState.initialize()
 
-    # Encabezado
-    st.title("🧾 Extractor de Comprobantes de Compras y Ventas")
-    st.markdown("Automatización de lectura, extracción de datos y clasificación local de comprobantes.")
+    # ── Sidebar: Empresas y validación SUNAT ──────────────────────────────────
+    with st.sidebar:
+        render_company_manager()
 
+    # ── Encabezado ────────────────────────────────────────────────────────────
+    st.title("🧾 Extractor de Comprobantes de Compras y Ventas")
+    st.markdown(
+        "Automatización de lectura, extracción de datos y clasificación local de comprobantes."
+    )
     st.divider()
 
-    # Layout de la interfaz
+    # ── Layout principal ──────────────────────────────────────────────────────
     col_left, col_right = st.columns([1, 1], gap="large")
 
     with col_left:
