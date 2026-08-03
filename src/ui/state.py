@@ -24,6 +24,8 @@ class AppState:
             st.session_state.uploader_reset_key = 0
         if "_clearing" not in st.session_state:
             st.session_state._clearing = False
+        if "document_type" not in st.session_state:
+            st.session_state.document_type = "PURCHASE"
 
     @staticmethod
     def update_selection(result: SelectDocumentsResult) -> None:
@@ -87,4 +89,15 @@ class AppState:
         """
         cls.initialize()
         return f"file_uploader_widget_{st.session_state.uploader_reset_key}"
+
+    @classmethod
+    def get_document_type(cls) -> str:
+        """Retorna el tipo de operación seleccionado: PURCHASE | SALE."""
+        cls.initialize()
+        return st.session_state.document_type
+
+    @staticmethod
+    def set_document_type(doc_type: str) -> None:
+        """Guarda el tipo de operación seleccionado."""
+        st.session_state.document_type = doc_type
 
