@@ -1,0 +1,25 @@
+{
+  "file_name": "prueba02.jpeg",
+  "raw_text": "MASS\nRUC 20608280333\nSAN BORJA,LIMA\nBOLETA DE VENTA ELECTRONICA\nBBM7-00055584\n7751271036245 GL0ENTBL800M\n2X\n4.50\n9.00\nSUBTOTAL\nS/\n9.00\n2UNIDAD(ES)\nOP.GRAVADA\n7.63\nI.G.V.\nS/\n1.37\nIMPORTE TOTAL\nS/\n9.00\nTOTALA PAGAR\nS/\n9.00\nNUEVE SOLES\nSOLES\n20.00\nVUELTO\n11.00-\nRepresentacion impresa de boleta\nelectronica revisarla en\nwww.tiendasmass.com.pe\n23.02.26 19:57 AC-00\n0252 2610/002/005",
+  "parsed_data": {
+    "document_type": "PURCHASE",
+    "invoice_type": "BOLETA DE VENTA ELECTRONICA",
+    "series": "BBM7",
+    "number": "00055584",
+    "issue_date": "23/02/2026",
+    "currency": "SOLES",
+    "supplier_ruc": "20608280333",
+    "supplier_name": "MASS",
+    "customer_ruc": "20608280333",
+    "customer_doc_type": "RUC",
+    "customer_name": null,
+    "subtotal": 9.0,
+    "igv": 1.37,
+    "total": 9.0,
+    "description": "GL0ENTBL800M",
+    "raw_text": "MASS\nRUC 20608280333\nSAN BORJA,LIMA\nBOLETA DE VENTA ELECTRONICA\nBBM7-00055584\n7751271036245 GL0ENTBL800M\n2X\n4.50\n9.00\nSUBTOTAL\nS/\n9.00\n2UNIDAD(ES)\nOP.GRAVADA\n7.63\nI.G.V.\nS/\n1.37\nIMPORTE TOTAL\nS/\n9.00\nTOTALA PAGAR\nS/\n9.00\nNUEVE SOLES\nSOLES\n20.00\nVUELTO\n11.00-\nRepresentacion impresa de boleta\nelectronica revisarla en\nwww.tiendasmass.com.pe\n23.02.26 19:57 AC-00\n0252 2610/002/005",
+    "ocr_engine": "rapidocr",
+    "source_type": "IMAGE",
+    "extraction_warnings": []
+  }
+}

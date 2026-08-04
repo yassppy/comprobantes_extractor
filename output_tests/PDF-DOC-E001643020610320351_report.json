@@ -1,0 +1,25 @@
+{
+  "file_name": "PDF-DOC-E001643020610320351.pdf",
+  "raw_text": "D & T NRUTA\nFACTURA ELECTRONICA\nD & T NRUTA S.A.C.\nRUC: 20610320351\nAV. ANGAMOS ESTE 1049 URB. CERCADO\nE001-6430\nSURQUILLO - LIMA - LIMA\nFecha de Emisión : 17/03/2026 Forma de pago: Contado\nSeñor(es) : TLA DISTRIBUIDORES E.I.R.L.\nRUC : 20511989052\nAV. PRINCIPAL 298 URB. REDUCTO\nENTRE LA AV. VILLARAN Y\nDirección del Cliente :\nPRINCIPAL-SURQUI LIMA-LIMA-\nSURQUILLO\nTipo de Moneda : SOLES\nObservación : DEPOSITO EN CUENTA\nCantidad Unidad Medida Código Descripción Valor Unitario\n3.00 UNIDAD 5454545 MANTENIMIENTO GENERAL + KIT DE REPUESTOS 300.8474576\nValor de Venta de Operaciones Gratuitas : S/ 0.00 Sub Total Ventas : S/ 902.54\nAnticipos : S/ 0.00\nDescuentos : S/ 0.00\nValor Venta : S/ 902.54\nSON: UN MIL SESENTA Y CINCO Y 00/100 SOLES ISC : S/ 0.00\nIGV : S/ 162.46\nOtros Cargos : S/ 0.00\nOtros Tributos : S/ 0.00\nMonto de redondeo : S/ 0.00\nImporte Total : S/ 1,065.00\nEsta es una representación impresa de la factura electrónica, generada en el Sistema de SUNAT. Puede\nverificarla utilizando su clave SOL.",
+  "parsed_data": {
+    "document_type": "SALE",
+    "invoice_type": "FACTURA ELECTRONICA",
+    "series": "E001",
+    "number": "6430",
+    "issue_date": "17/03/2026",
+    "currency": "SOLES",
+    "supplier_ruc": "20610320351",
+    "supplier_name": "D & T NRUTA S.A.C.",
+    "customer_ruc": "20511989052",
+    "customer_doc_type": "RUC",
+    "customer_name": null,
+    "subtotal": 902.54,
+    "igv": 162.46,
+    "total": 1065.0,
+    "description": "MANTENIMIENTO GENERAL + KIT DE REPUESTOS",
+    "raw_text": "D & T NRUTA\nFACTURA ELECTRONICA\nD & T NRUTA S.A.C.\nRUC: 20610320351\nAV. ANGAMOS ESTE 1049 URB. CERCADO\nE001-6430\nSURQUILLO - LIMA - LIMA\nFecha de Emisión : 17/03/2026 Forma de pago: Contado\nSeñor(es) : TLA DISTRIBUIDORES E.I.R.L.\nRUC : 20511989052\nAV. PRINCIPAL 298 URB. REDUCTO\nENTRE LA AV. VILLARAN Y\nDirección del Cliente :\nPRINCIPAL-SURQUI LIMA-LIMA-\nSURQUILLO\nTipo de Moneda : SOLES\nObservación : DEPOSITO EN CUENTA\nCantidad Unidad Medida Código Descripción Valor Unitario\n3.00 UNIDAD 5454545 MANTENIMIENTO GENERAL + KIT DE REPUESTOS 300.8474576\nValor de Venta de Operaciones Gratuitas : S/ 0.00 Sub Total Ventas : S/ 902.54\nAnticipos : S/ 0.00\nDescuentos : S/ 0.00\nValor Venta : S/ 902.54\nSON: UN MIL SESENTA Y CINCO Y 00/100 SOLES ISC : S/ 0.00\nIGV : S/ 162.46\nOtros Cargos : S/ 0.00\nOtros Tributos : S/ 0.00\nMonto de redondeo : S/ 0.00\nImporte Total : S/ 1,065.00\nEsta es una representación impresa de la factura electrónica, generada en el Sistema de SUNAT. Puede\nverificarla utilizando su clave SOL.",
+    "ocr_engine": "pdfplumber",
+    "source_type": "PDF",
+    "extraction_warnings": []
+  }
+}

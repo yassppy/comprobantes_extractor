@@ -63,14 +63,14 @@ COMMENT ON COLUMN companies.sunat_validated_at IS 'Última vez que se consultó 
 -- Proveedores y clientes únicos identificados por su documento.
 -- Evita repetir razón social en cada comprobante.
 -- Los RUC de 11 dígitos se pueden validar contra SUNAT.
--- Los DNI de 8 dígitos no aplican scraping SUNAT.
+-- Los DNI de 8 dígitos se pueden validar con sunat pero el opcional con 0 no.
 -- ============================================================================
 
 CREATE TABLE business_partners (
 
     id                  BIGSERIAL PRIMARY KEY,
 
-    document_type       VARCHAR(10)     NOT NULL
+    document_type       VARCHAR(20)     NOT NULL
                         CHECK (document_type IN ('RUC', 'DNI', 'VENTA MENOR')),
 
     document_number     VARCHAR(11)     NOT NULL UNIQUE,
@@ -186,7 +186,7 @@ CREATE TABLE documents (
     -- Datos del comprobante
     invoice_type            VARCHAR(60),            -- FACTURA ELECTRONICA, BOLETA DE VENTA, etc.
     issue_date              DATE,
-    currency                VARCHAR(10),
+    currency                VARCHAR(20),
     series                  VARCHAR(20),
     number                  VARCHAR(30),
 
