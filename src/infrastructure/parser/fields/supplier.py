@@ -30,22 +30,22 @@ def extract_supplier_name(text: str, ruc: str | None) -> str | None:
 
     lines = [l.strip() for l in text.splitlines() if l.strip()]
 
+    # Buscar una línea con sufijo empresarial en las primeras 10 líneas
+    for i in range(min(10, len(lines))):
+        line = lines[i]
+        if any(s in line.upper() for s in _COMPANY_SUFFIXES) and not line.upper().startswith("SEÑOR") and not line.upper().startswith("SENOR"):
+            return line
+
     ruc_index: int | None = None
-    for i, line in enumerate(lines):
-        if ruc in line:
-            ruc_index = i
-            break
+    if ruc:
+        for i, line in enumerate(lines):
+            if ruc in line:
+                ruc_index = i
+                break
 
-    if ruc_index is None:
-        return None
+    if ruc_index is not None and ruc_index > 0:
+        prev_line = lines[ruc_index - 1]
+        if not any(k in prev_line.upper() for k in ("FACTURA", "BOLETA", "RUC", "TELEFONO", "FECHA")):
+            return prev_line
 
-    # Buscar hacia arriba una línea con sufijo empresarial
-    for i in range(max(0, ruc_index - 5), ruc_index):
-        if any(s in lines[i].upper() for s in _COMPANY_SUFFIXES):
-            return lines[i]
-
-    # Fallback: línea anterior al RUC
-    if ruc_index > 0:
-        return lines[ruc_index - 1]
-
-    return lines[0]
+    return ruc if ruc else (lines[0] if lines else None)

@@ -59,18 +59,18 @@ def parse_document(
     data.total = extract_total(text)
     data.description = extract_description(text)
 
-    # ── Socio de negocio según tipo de operación ────────────────────────────
-    if document_type == DocumentType.SALE:
-        # VENTAS: la empresa emite → el cliente es el receptor
-        doc_type_str, doc_number = extract_customer(text)
-        data.customer_doc_type = doc_type_str
-        data.customer_ruc = doc_number
-        # En ventas el emisor es la propia empresa — proveedor no aplica
+    # ── Socio de negocio (Emisor / Proveedor) ──────────────────────────────────
+    supplier_ruc = extract_ruc(text)
+    if not supplier_ruc:
+        data.supplier_ruc = "00000000"
     else:
-        # COMPRAS: el proveedor emite → extraer RUC y razón social del emisor
-        supplier_ruc = extract_ruc(text)
         data.supplier_ruc = supplier_ruc
-        data.supplier_name = extract_supplier_name(text, supplier_ruc)
+    data.supplier_name = extract_supplier_name(text, supplier_ruc)
+
+    # ── Socio de negocio (Receptor / Cliente) ──────────────────────────────────
+    cust_doc_type, cust_number = extract_customer(text)
+    data.customer_doc_type = cust_doc_type
+    data.customer_ruc = cust_number if cust_number else "00000000"
 
     # Advertencias si faltan datos clave
     missing: list[str] = []

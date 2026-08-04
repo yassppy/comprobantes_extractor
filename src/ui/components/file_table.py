@@ -78,7 +78,7 @@ def _render_pending_table(valid_docs) -> None:
 
     st.dataframe(
         table_data,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         column_config={
             "Error": st.column_config.TextColumn("Detalle de Error", width="large"),
@@ -95,6 +95,9 @@ def _render_extracted_table(valid_docs) -> None:
         label = _STATUS_LABEL.get(doc.status, doc.status.value.capitalize())
         ed: ExtractedData | None = doc.extracted_data  # type: ignore[assignment]
 
+        partner_doc = (ed.supplier_ruc or ed.customer_ruc or "00000000") if ed else "—"
+        partner_name = (ed.supplier_name or ed.customer_name or partner_doc) if ed else "—"
+
         table_data.append({
             "#":           idx,
             "Archivo":     doc.name,
@@ -103,9 +106,9 @@ def _render_extracted_table(valid_docs) -> None:
             "Serie":       (ed.series or "—") if ed else "—",
             "Número":      (ed.number or "—") if ed else "—",
             "Fecha":       (ed.issue_date or "—") if ed else "—",
-            "Proveedor":   (ed.supplier_name or ed.supplier_ruc or "—") if ed else "—",
-            "Subtotal":    (f"{ed.subtotal:.2f}" if ed and ed.subtotal is not None else "—"),
-            "IGV":         (f"{ed.igv:.2f}" if ed and ed.igv is not None else "—"),
+            "RUC/DNI":     partner_doc,
+            "Socio":       partner_name,
+            "Descripción": (ed.description or "—") if ed else "—",
             "Total":       (f"{ed.total:.2f}" if ed and ed.total is not None else "—"),
             "Motor OCR":   (ed.ocr_engine or "—") if ed else "—",
             "Estado":      label,
@@ -114,7 +117,7 @@ def _render_extracted_table(valid_docs) -> None:
 
     st.dataframe(
         table_data,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         column_config={
             "Error": st.column_config.TextColumn("Detalle de Error", width="large"),

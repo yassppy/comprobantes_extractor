@@ -7,7 +7,9 @@ requires-python = ">=3.13"
 dependencies = [
     "pdfplumber>=0.11.0",
     "playwright>=1.62.0",
+    "psycopg[binary]>=3.3.4",
     "pydantic>=2.13.4",
+    "python-dotenv>=1.2.2",
     "pyyaml>=6.0.3",
     "rapidocr-onnxruntime>=1.4.4",
     "rich>=15.0.0",

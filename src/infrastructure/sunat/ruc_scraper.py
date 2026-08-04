@@ -1,7 +1,11 @@
-"""Scraper de RUC en el portal SUNAT usando Playwright (REQ-4).
+"""Scraper del portal SUNAT - Consulta RUC usando Playwright.
 
-Consulta https://e-consultaruc.sunat.gob.pe y retorna los datos
-del contribuyente: razón social, estado, condición y domicilio fiscal.
+Soporta dos modos de búsqueda:
+  - Por RUC (11 dígitos)     → URL ?accion=consPorRuc
+  - Por DNI (8 dígitos)      → URL ?accion=consPorDocumento (tab "Por Documento")
+
+El resultado de buscar por DNI devuelve el RUC asociado, nombre completo,
+ubicación y estado del contribuyente.
 """
 
 from __future__ import annotations
@@ -12,10 +16,9 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-SUNAT_RUC_URL = (
-    "https://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/jcrS00Alias"
-    "?accion=consPorRuc"
-)
+_BASE_URL = "https://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc"
+SUNAT_RUC_URL = f"{_BASE_URL}/jcrS00Alias?accion=consPorRuc"
+SUNAT_DOC_URL = f"{_BASE_URL}/FrameCritrioBusquedaWeb.jsp"
 
 
 @dataclass(slots=True)
@@ -24,27 +27,26 @@ class SunatRucInfo:
     business_name: str
     trade_name: str | None
     status: str               # ACTIVO | BAJA DEFINITIVA | …
-    condition: str            # HABIDO | NO HABIDO | NO HALLADO
+    condition: str            # HABIDO | NO HABIDO | NO HALLADO | N/A (DNI)
     fiscal_address: str | None
     is_active: bool
     is_habido: bool
     is_valid: bool            # True si ACTIVO + HABIDO
     validated_at: datetime
+    # Campos extra cuando se busca por DNI
+    dni: str | None = None
+    location: str | None = None
 
+
+# ─── Scraper por RUC ──────────────────────────────────────────────────────────
 
 def scrape_ruc(ruc_number: str) -> SunatRucInfo:
     """
-    Consulta los datos de un RUC en el portal SUNAT usando Playwright headless.
-
-    Args:
-        ruc_number: RUC de 11 dígitos.
-
-    Returns:
-        SunatRucInfo con todos los datos del contribuyente.
+    Consulta un RUC de 11 dígitos en SUNAT.
 
     Raises:
-        ValueError: RUC inválido o no encontrado en SUNAT.
-        RuntimeError: Error de conectividad o respuesta inesperada del portal.
+        ValueError: RUC inválido o no encontrado.
+        RuntimeError: Error de conectividad.
     """
     if len(ruc_number) != 11 or not ruc_number.isdigit():
         raise ValueError(
@@ -55,13 +57,7 @@ def scrape_ruc(ruc_number: str) -> SunatRucInfo:
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/122.0.0.0 Safari/537.36"
-            )
-        )
+        context = browser.new_context(user_agent=_UA)
         page = context.new_page()
 
         invalid_detected = False
@@ -71,7 +67,6 @@ def scrape_ruc(ruc_number: str) -> SunatRucInfo:
             nonlocal invalid_detected, dialog_msg
             invalid_detected = True
             dialog_msg = dialog.message
-            logger.warning("Alerta SUNAT para RUC %s: %s", ruc_number, dialog_msg)
             dialog.accept()
 
         page.on("dialog", _handle_dialog)
@@ -79,7 +74,6 @@ def scrape_ruc(ruc_number: str) -> SunatRucInfo:
         try:
             logger.info("Consultando RUC %s en SUNAT…", ruc_number)
             page.goto(SUNAT_RUC_URL, timeout=15_000)
-
             page.locator("#txtRuc").fill(ruc_number)
             page.get_by_role("button", name="Buscar").click()
             page.wait_for_timeout(1_000)
@@ -103,46 +97,34 @@ def scrape_ruc(ruc_number: str) -> SunatRucInfo:
                     "Verifica tu conexión a internet."
                 )
 
-            # ── Extracción de datos ──────────────────────────────────────
             raw_title = (
                 page.locator("div.list-group-item")
                 .filter(has_text="Número de RUC:")
                 .locator("h4")
                 .last.inner_text()
             )
-            parts = [p.strip() for p in raw_title.split("-", 1)]
+            parts = [x.strip() for x in raw_title.split("-", 1)]
             business_name = parts[1] if len(parts) > 1 else raw_title
 
             trade_name = (
                 page.locator("div.list-group-item")
                 .filter(has_text="Nombre Comercial:")
-                .locator("p")
-                .last.inner_text()
-                .strip()
+                .locator("p").last.inner_text().strip()
             )
-
             status = (
                 page.locator("div.list-group-item")
                 .filter(has_text="Estado del Contribuyente:")
-                .locator("p")
-                .last.inner_text()
-                .strip()
+                .locator("p").last.inner_text().strip()
             )
-
             condition = (
                 page.locator("div.list-group-item")
                 .filter(has_text="Condición del Contribuyente:")
-                .locator("p")
-                .last.inner_text()
-                .strip()
+                .locator("p").last.inner_text().strip()
             )
-
             fiscal_address = (
                 page.locator("div.list-group-item")
                 .filter(has_text="Domicilio Fiscal:")
-                .locator("p")
-                .last.inner_text()
-                .strip()
+                .locator("p").last.inner_text().strip()
             )
 
             is_active = status.upper() == "ACTIVO"
@@ -164,13 +146,165 @@ def scrape_ruc(ruc_number: str) -> SunatRucInfo:
         except ValueError:
             raise
         except Exception as exc:
-            logger.error(
-                "Error inesperado en scraping SUNAT para RUC %s: %s",
-                ruc_number,
-                exc,
+            logger.error("Error scraping RUC %s: %s", ruc_number, exc)
+            raise RuntimeError(f"Error consultando SUNAT para RUC {ruc_number}: {exc}") from exc
+        finally:
+            browser.close()
+
+
+# ─── Scraper por DNI ──────────────────────────────────────────────────────────
+
+def scrape_dni(dni_number: str) -> SunatRucInfo:
+    """
+    Busca el RUC asociado a un DNI usando el tab "Por Documento" de SUNAT.
+
+    Args:
+        dni_number: DNI de 8 dígitos.
+
+    Returns:
+        SunatRucInfo con el RUC encontrado y datos del contribuyente.
+
+    Raises:
+        ValueError: DNI no encontrado o sin RUC asociado.
+        RuntimeError: Error de conectividad.
+    """
+    if len(dni_number) != 8 or not dni_number.isdigit():
+        raise ValueError(
+            f"El DNI '{dni_number}' debe contener exactamente 8 dígitos numéricos."
+        )
+
+    from playwright.sync_api import sync_playwright
+
+    SUNAT_FRAME_URL = (
+        "https://e-consultaruc.sunat.gob.pe/cl-ti-itmrconsruc/"
+        "FrameCriterioBusquedaWeb.jsp"
+    )
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(user_agent=_UA)
+        page = context.new_page()
+
+        try:
+            logger.info("Consultando DNI %s en SUNAT…", dni_number)
+            page.goto(SUNAT_FRAME_URL, timeout=20_000)
+            page.wait_for_timeout(1_500)
+
+            # Click en tab "Por Documento"
+            page.get_by_role("button", name="Por Documento").click()
+            page.wait_for_timeout(800)
+
+            # Seleccionar "Documento Nacional de Identidad" (value='1')
+            page.select_option("#cmbTipoDoc", value="1")
+
+            # Ingresar el DNI en el campo correcto
+            page.locator("#txtNumeroDocumento").fill(dni_number)
+            page.get_by_role("button", name="Buscar").click()
+            page.wait_for_timeout(3_000)
+
+            body = page.inner_text("body")
+
+            # Verificar si no encontró resultado
+            body_lower = body.lower()
+            if "no se encontró" in body_lower or "no existen" in body_lower or "no hay" in body_lower:
+                raise ValueError(
+                    f"El DNI '{dni_number}' no tiene RUC asociado en SUNAT."
+                )
+
+            if "relación de contribuyentes" not in body_lower:
+                raise ValueError(
+                    f"El DNI '{dni_number}' no tiene RUC asociado en SUNAT."
+                )
+
+            # Parsear resultado — formato:
+            # "RUC: 10735122075\nNOMBRE COMPLETO\nUbicación: LIMA\nEstado: ACTIVO"
+            import re
+
+            ruc_match = re.search(r"RUC:\s*(\d{11})", body)
+            if not ruc_match:
+                raise ValueError(
+                    f"No se encontró RUC en la respuesta de SUNAT para DNI '{dni_number}'."
+                )
+            ruc_found = ruc_match.group(1)
+
+            # Nombre: línea después del RUC
+            lines = [l.strip() for l in body.splitlines() if l.strip()]
+            business_name = ""
+            for idx, line in enumerate(lines):
+                if ruc_found in line:
+                    # El nombre está en la misma línea después del RUC o en la siguiente
+                    rest = line.replace(f"RUC: {ruc_found}", "").strip()
+                    if rest:
+                        business_name = rest
+                    elif idx + 1 < len(lines):
+                        business_name = lines[idx + 1]
+                    break
+
+            # Ubicación
+            loc_match = re.search(r"Ubicaci[oó]n:\s*(.+)", body, re.IGNORECASE)
+            location = loc_match.group(1).strip() if loc_match else None
+
+            # Estado
+            status_match = re.search(r"Estado:\s*(.+)", body, re.IGNORECASE)
+            status = status_match.group(1).strip() if status_match else "ACTIVO"
+
+            is_active = status.upper() == "ACTIVO"
+
+            return SunatRucInfo(
+                ruc=ruc_found,
+                business_name=business_name or dni_number,
+                trade_name=None,
+                status=status,
+                condition="N/A",
+                fiscal_address=None,
+                is_active=is_active,
+                is_habido=True,
+                is_valid=is_active,
+                validated_at=datetime.now(),
+                dni=dni_number,
+                location=location,
             )
+
+        except ValueError:
+            raise
+        except Exception as exc:
+            logger.error("Error scraping DNI %s: %s", dni_number, exc)
             raise RuntimeError(
-                f"Error consultando SUNAT para RUC {ruc_number}: {exc}"
+                f"Error consultando SUNAT para DNI {dni_number}: {exc}"
             ) from exc
         finally:
             browser.close()
+
+
+# ─── Dispatcher ──────────────────────────────────────────────────────────────
+
+_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/122.0.0.0 Safari/537.36"
+)
+
+
+def scrape_document(document_number: str, document_type: str = "RUC") -> SunatRucInfo:
+    """
+    Dispatcher: enruta a `scrape_ruc` o `scrape_dni` según el tipo de documento.
+
+    Args:
+        document_number: RUC (11 dígitos) o DNI (8 dígitos).
+        document_type:   'RUC' | 'DNI'
+
+    Returns:
+        SunatRucInfo con los datos del contribuyente.
+    """
+    doc_type = document_type.upper().strip()
+
+    if doc_type == "RUC" or len(document_number) == 11:
+        return scrape_ruc(document_number)
+
+    if doc_type == "DNI" or len(document_number) == 8:
+        return scrape_dni(document_number)
+
+    raise ValueError(
+        f"Tipo de documento no soportado: '{document_type}' "
+        f"(número: '{document_number}'). Se esperan RUC (11 dígitos) o DNI (8 dígitos)."
+    )

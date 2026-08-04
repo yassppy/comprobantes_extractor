@@ -9,7 +9,7 @@ _IGNORE_HEADERS = frozenset({
     "CANTIDAD", "CANT.", "CANT",
     "UNIDAD", "UND", "UNI",
     "UNIDAD MEDIDA DESCRIPCION", "UNIDAD MEDIDA DESCRIPCIÓN",
-    "UNIDAD MEDIDA", "VALOR UNITARIO",
+    "UNIDAD MEDIDA", "UNIDADMEDIDA", "VALOR UNITARIO",
     "CODIGO", "CÓDIGO",
     "V.UNIT", "P/U",
     "TOTAL", "SUBTOTAL", "IGV",
@@ -99,7 +99,10 @@ def extract_description(text: str) -> str | None:
             continue
         if re.search(r"\d+\.\d{2}$", line):
             continue
-        if upper.strip() in _IGNORE_HEADERS:
+        clean_upper = upper.replace(" ", "")
+        if any(h in clean_upper for h in ("UNIDADMEDIDA", "VALORUNITARIO", "ICBPER", "OBSERVACION", "OBSERVACIÓN", "CANTIDAD", "DESCRIPCION", "DESCRIPCIÓN")):
+            continue
+        if clean_upper in _IGNORE_HEADERS or upper.strip() in _IGNORE_HEADERS:
             continue
         if any(p in upper for p in _EXCLUDE_WORDS):
             continue
@@ -115,7 +118,7 @@ def extract_description(text: str) -> str | None:
         candidates.append(line)
 
     for candidate in candidates:
-        if len(candidate) > 8:
+        if len(candidate) > 5:
             return candidate
 
     return None
