@@ -26,6 +26,11 @@ class AppState:
             st.session_state._clearing = False
         if "document_type" not in st.session_state:
             st.session_state.document_type = "PURCHASE"
+        if "active_company" not in st.session_state:
+            # Dict: {ruc, business_name} | None
+            st.session_state.active_company = None
+        if "save_result" not in st.session_state:
+            st.session_state.save_result = None
 
     @staticmethod
     def update_selection(result: SelectDocumentsResult) -> None:
@@ -46,6 +51,7 @@ class AppState:
         st.session_state.invalid_files = []
         st.session_state.processing_started = False
         st.session_state.batch_summary = None
+        st.session_state.save_result = None
         # Cambia la key del file_uploader para forzar su reset visual
         st.session_state.uploader_reset_key = st.session_state.get("uploader_reset_key", 0) + 1
         # Marca que se acaba de limpiar para que file_selector no re-cargue
@@ -100,4 +106,26 @@ class AppState:
     def set_document_type(doc_type: str) -> None:
         """Guarda el tipo de operación seleccionado."""
         st.session_state.document_type = doc_type
+
+    @classmethod
+    def get_active_company(cls) -> dict | None:
+        """Retorna la empresa activa seleccionada para el lote: {ruc, business_name} | None."""
+        cls.initialize()
+        return st.session_state.active_company
+
+    @staticmethod
+    def set_active_company(company: dict | None) -> None:
+        """Guarda la empresa activa. Recibe {ruc, business_name} o None."""
+        st.session_state.active_company = company
+
+    @classmethod
+    def get_save_result(cls):
+        """Retorna el resultado del último guardado en BD (SaveResult | None)."""
+        cls.initialize()
+        return st.session_state.save_result
+
+    @staticmethod
+    def set_save_result(result) -> None:
+        """Guarda el resultado del guardado en BD."""
+        st.session_state.save_result = result
 

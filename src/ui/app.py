@@ -3,6 +3,7 @@
 import streamlit as st
 
 from ui.components.company_manager import render_company_manager
+from ui.components.consult_documents import render_consult_documents
 from ui.components.file_selector import render_file_selector
 from ui.components.file_table import render_file_table
 from ui.components.summary_card import render_summary_card
@@ -31,17 +32,26 @@ def main() -> None:
     )
     st.divider()
 
-    # ── Layout principal ──────────────────────────────────────────────────────
-    col_left, col_right = st.columns([1, 1], gap="large")
+    # ── Navegación por pestañas ───────────────────────────────────────────────
+    tab_process, tab_consult = st.tabs([
+        "⚡ Procesar Comprobantes",
+        "🔍 Consultar Facturas Procesadas",
+    ])
 
-    with col_left:
-        render_file_selector()
+    with tab_process:
+        col_left, col_right = st.columns([1, 1], gap="large")
 
-    with col_right:
-        render_file_table()
+        with col_left:
+            render_file_selector()
 
-    render_toolbar()
-    render_summary_card()
+        with col_right:
+            render_file_table()
+
+        render_toolbar()
+        render_summary_card()
+
+    with tab_consult:
+        render_consult_documents()
 
 
 if __name__ == "__main__":

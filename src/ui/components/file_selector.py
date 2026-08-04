@@ -57,7 +57,9 @@ def render_file_selector() -> None:
         # Si se acaba de limpiar, ignoramos lo que devuelve el uploader en este ciclo
         if st.session_state.get("_clearing", False):
             st.session_state._clearing = False
-        elif uploaded_files is not None:
+        elif uploaded_files:
+            # Solo actualizar si hay archivos seleccionados en el uploader
+            # (no borrar la selección de carpeta cuando el uploader está vacío)
             result = use_case.execute_from_uploaded_files(uploaded_files)
             result = _apply_document_type(result, doc_type)
             AppState.update_selection(result)
