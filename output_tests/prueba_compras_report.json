@@ -1,0 +1,25 @@
+{
+  "file_name": "prueba_compras.png",
+  "raw_text": "EMPRESAEJEMPLODESERVICIOSS.A.C.\nCALLEDELOSEJEMPLOS123\nFACTURAELECTRONICA\nRUC:20432109876\nTELEFONO:(01)555-0100\nE001-443\nFechadeEmision\n：02/03/2026\nForma depago:Contado\nSenor(es)\n：D&TNRUTAS.A.C.\nRUC\n：20610320351\nJR.FRANCISCOMASIAS2400OTR.\nEstablecimientodelEmisor\n:AGRUPAMIENTOSANEUGENIO\nDPTO. 204INT.E LIMA-LIMA-LINCE\nTipo deMoneda\n：SOLESPERUANOS\nObservacion\nCantidad\nUnidadMedida\nDescripcion\nValorUnitario\nICBPER\n25.00\nUNIDAD\n835-20-30-8.5FAJAMOTOSCOOTERBANDOMOTOR\nconceptual S/30.419\n0.00\n150CC/175CC\nSub Total Ventas:\nconceptualS/760.50\nAnticipos:\n$0.00\nValordeVentadeOperacionesGratuitas:\nDescuentes:\n$0.00\n$0.00\nValorVenta:\nconceptualS/760.50\nISC :\nConceptual S/136.90\nIGV :\nSON:OCHOCIENTOSNOVENTAYSIETEY40/100SOLESPERUANOS\nConceptualS/136.90\nICBPER :\nS/0.00\nOtros Cargos:\nS/0.00\nS/0.00\nMonto de redondeo:\nconceptual S/0.00\nImporte Total:\nconceptualS/897.40\nEsta es unarepresentacion impresa dela factura electronica,generada en el Sistema deSUNAT.Puede\nverificarlautilizandosuclaveSol.",
+  "parsed_data": {
+    "document_type": "PURCHASE",
+    "invoice_type": "FACTURA ELECTRONICA",
+    "series": "E001",
+    "number": "443",
+    "issue_date": "02/03/2026",
+    "currency": "SOLES",
+    "supplier_ruc": "20432109876",
+    "supplier_name": "EMPRESAEJEMPLODESERVICIOSS.A.C.",
+    "customer_ruc": "20610320351",
+    "customer_doc_type": "RUC",
+    "customer_name": null,
+    "subtotal": 760.5,
+    "igv": 136.9,
+    "total": 897.4,
+    "description": "835-20-30-8.5FAJAMOTOSCOOTERBANDOMOTOR",
+    "raw_text": "EMPRESAEJEMPLODESERVICIOSS.A.C.\nCALLEDELOSEJEMPLOS123\nFACTURAELECTRONICA\nRUC:20432109876\nTELEFONO:(01)555-0100\nE001-443\nFechadeEmision\n：02/03/2026\nForma depago:Contado\nSenor(es)\n：D&TNRUTAS.A.C.\nRUC\n：20610320351\nJR.FRANCISCOMASIAS2400OTR.\nEstablecimientodelEmisor\n:AGRUPAMIENTOSANEUGENIO\nDPTO. 204INT.E LIMA-LIMA-LINCE\nTipo deMoneda\n：SOLESPERUANOS\nObservacion\nCantidad\nUnidadMedida\nDescripcion\nValorUnitario\nICBPER\n25.00\nUNIDAD\n835-20-30-8.5FAJAMOTOSCOOTERBANDOMOTOR\nconceptual S/30.419\n0.00\n150CC/175CC\nSub Total Ventas:\nconceptualS/760.50\nAnticipos:\n$0.00\nValordeVentadeOperacionesGratuitas:\nDescuentes:\n$0.00\n$0.00\nValorVenta:\nconceptualS/760.50\nISC :\nConceptual S/136.90\nIGV :\nSON:OCHOCIENTOSNOVENTAYSIETEY40/100SOLESPERUANOS\nConceptualS/136.90\nICBPER :\nS/0.00\nOtros Cargos:\nS/0.00\nS/0.00\nMonto de redondeo:\nconceptual S/0.00\nImporte Total:\nconceptualS/897.40\nEsta es unarepresentacion impresa dela factura electronica,generada en el Sistema deSUNAT.Puede\nverificarlautilizandosuclaveSol.",
+    "ocr_engine": "rapidocr",
+    "source_type": "IMAGE",
+    "extraction_warnings": []
+  }
+}
