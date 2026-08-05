@@ -8,7 +8,7 @@ R3: Mostrar resumen general al finalizar.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from rich.console import Console
 from rich.live import Live
@@ -215,3 +215,87 @@ def finish_sunat_validation(
     console.rule("[dim]Fin de validación SUNAT[/dim]")
     console.print()
 
+
+
+# ─── Clasificación automática con Ollama (REQ-5) ──────────────────────────────
+
+def log_classify_start(
+    total: int,
+    batch_size: int,
+    model: str,
+    base_url: str,
+) -> None:
+    """Encabezado en consola al iniciar la clasificación por lotes."""
+    console.print()
+    console.rule("[bold magenta]🤖 Clasificación Automática con Ollama[/bold magenta]")
+    console.print(
+        f"  [dim]{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}[/dim]  "
+        f"[white]{total} comprobante(s)[/white]  │  "
+        f"[cyan]Lote de {batch_size}[/cyan]  │  "
+        f"[yellow]{model}[/yellow]  │  "
+        f"[dim]{base_url}[/dim]"
+    )
+    console.print()
+
+
+def log_classify_item(
+    index: int,
+    total: int,
+    doc_id: int,
+    description: str,
+    category_code: str | None,
+    elapsed: float,
+    skipped: bool = False,
+    error: str | None = None,
+) -> None:
+    """Registra el resultado de clasificación de un documento individual."""
+    desc_preview = (description[:60] + "…") if len(description) > 60 else description
+
+    if skipped:
+        console.print(
+            f"  [dim]–[/dim]  [{index}/{total}] "
+            f"[dim]doc#{doc_id}[/dim]  [dim]Sin descripción — omitido[/dim]"
+        )
+    elif error:
+        console.print(
+            f"  [red]✗[/red]  [{index}/{total}] "
+            f"[dim]doc#{doc_id}[/dim]  [italic]{desc_preview}[/italic]  "
+            f"[red]{error[:80]}[/red]  [dim]({elapsed:.2f}s)[/dim]"
+        )
+    elif category_code:
+        console.print(
+            f"  [green]✓[/green]  [{index}/{total}] "
+            f"[dim]doc#{doc_id}[/dim]  [italic]{desc_preview}[/italic]  "
+            f"→  [bold green]{category_code}[/bold green]  "
+            f"[dim]({elapsed:.2f}s)[/dim]"
+        )
+    else:
+        console.print(
+            f"  [yellow]?[/yellow]  [{index}/{total}] "
+            f"[dim]doc#{doc_id}[/dim]  [italic]{desc_preview}[/italic]  "
+            f"→  [yellow]SIN_CATEGORIA[/yellow]  [dim]({elapsed:.2f}s)[/dim]"
+        )
+
+
+def log_classify_finish(result: Any) -> None:
+    """Resumen final de la clasificación por lotes con Rich."""
+    table = Table(
+        title="🤖 Resumen de Clasificación Automática",
+        show_lines=True,
+        border_style="magenta",
+    )
+    table.add_column("Campo", style="bold white", min_width=24)
+    table.add_column("Valor", style="white")
+
+    table.add_row("Total documentos", str(result.total))
+    table.add_row("✅ Clasificados", f"[green]{result.classified}[/green]")
+    table.add_row("⏭ Omitidos (sin desc.)", f"[dim]{result.skipped}[/dim]")
+    table.add_row("❌ Errores", f"[red]{result.errors}[/red]")
+    table.add_row("⏱ Tiempo total", f"{result.total_seconds:.2f}s")
+    if result.classified + result.errors > 0:
+        table.add_row("⏱ Promedio por doc", f"{result.avg_seconds:.2f}s")
+
+    console.print()
+    console.print(table)
+    console.rule("[dim]Fin de clasificación[/dim]")
+    console.print()

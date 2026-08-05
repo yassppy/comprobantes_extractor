@@ -4,6 +4,7 @@ import logging
 
 import streamlit as st
 
+from ui.components.classify_panel import render_classify_panel
 from ui.components.company_manager import render_company_manager
 from ui.components.consult_documents import render_consult_documents
 from ui.components.file_selector import render_file_selector
@@ -67,8 +68,9 @@ def main() -> None:
     st.divider()
 
     # ── Navegación por pestañas ───────────────────────────────────────────────
-    tab_process, tab_consult = st.tabs([
+    tab_process, tab_classify, tab_consult = st.tabs([
         "⚡ Procesar Comprobantes",
+        "🤖 Clasificar por Lotes",
         "🔍 Consultar Facturas Procesadas",
     ])
 
@@ -83,6 +85,9 @@ def main() -> None:
 
         render_toolbar()
         render_summary_card()
+
+    with tab_classify:
+        render_classify_panel()
 
     with tab_consult:
         render_consult_documents()

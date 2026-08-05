@@ -65,6 +65,7 @@ def _load_companies_from_db() -> list[dict]:
             rows = get_all_companies(conn)
         return [
             {
+                "id":            r["id"],
                 "ruc":           r["ruc"],
                 "business_name": r["business_name"],
                 "trade_name":    r.get("trade_name"),
@@ -73,7 +74,7 @@ def _load_companies_from_db() -> list[dict]:
                 "sunat_condition": r.get("sunat_condition"),
                 "sunat_is_valid":  r.get("sunat_is_valid", False),
                 "sunat_validated_at": r.get("sunat_validated_at"),
-                "validation": None,  # resultado de la última sesión (se llena al re-validar)
+                "validation": None,
             }
             for r in rows
         ]
@@ -162,7 +163,7 @@ def _render_company_form() -> None:
         return
 
     new_entry = {
-        "ruc": ruc, "business_name": name, "trade_name": None,
+        "id": None, "ruc": ruc, "business_name": name, "trade_name": None,
         "fiscal_address": None, "sunat_status": None, "sunat_condition": None,
         "sunat_is_valid": False, "sunat_validated_at": None, "validation": None,
     }
@@ -172,6 +173,11 @@ def _render_company_form() -> None:
     if db_error:
         st.warning(f"Empresa en sesión, pero error en BD: {db_error}")
     else:
+        # Recargar desde BD para obtener el id real
+        reloaded = _load_companies_from_db()
+        found = next((c for c in reloaded if c["ruc"] == ruc), None)
+        if found:
+            new_entry.update(found)
         st.success(f"'{name}' agregada ✅")
     st.rerun()
 
@@ -229,64 +235,61 @@ def _render_companies_table() -> None:
     # Contar cuántas ya están validadas en BD
     already_valid = sum(1 for c in companies if c.get("sunat_validated_at") is not None)
 
-    col_btn, col_info = st.columns([1, 3])
-    with col_btn:
-        if st.button("🔍 Validar todas en SUNAT", type="primary", width="stretch"):
-            import time as _time
-            from console.rich_logger import (
-                finish_sunat_validation,
-                log_sunat_item,
-                start_sunat_validation,
+    if already_valid > 0:
+        st.caption(f"✅ {already_valid}/{len(companies)} empresa(s) validadas en SUNAT.")
+
+    if st.button("🔍 Validar todas en SUNAT", type="primary", width="stretch"):
+        import time as _time
+        from console.rich_logger import (
+            finish_sunat_validation,
+            log_sunat_item,
+            start_sunat_validation,
+        )
+
+        rucs = [c["ruc"] for c in companies]
+        company_name_map = {c["ruc"]: c.get("business_name", c["ruc"]) for c in companies}
+
+        start_sunat_validation(len(rucs), entity_type="Empresas")
+        t_total_start = _time.perf_counter()
+
+        def _on_company_validated(idx: int, r):
+            info = r.info
+            log_sunat_item(
+                document_number=r.ruc,
+                document_type="RUC",
+                name=company_name_map.get(r.ruc, r.ruc),
+                index=idx,
+                total=len(rucs),
+                success=r.success,
+                elapsed=r.elapsed,
+                status=info.status if info else None,
+                condition=info.condition if info else None,
+                is_valid=info.is_valid if info else False,
+                error=r.error,
             )
 
-            rucs = [c["ruc"] for c in companies]
-            company_name_map = {c["ruc"]: c.get("business_name", c["ruc"]) for c in companies}
+        with st.spinner(f"Consultando {len(rucs)} empresa(s) en SUNAT…"):
+            summary = validate_ruc_batch(rucs, on_item_validated=_on_company_validated)
 
-            start_sunat_validation(len(rucs), entity_type="Empresas")
-            t_total_start = _time.perf_counter()
+        elapsed_total = _time.perf_counter() - t_total_start
+        finish_sunat_validation(
+            total=summary.total,
+            valid=summary.valid,
+            invalid=summary.invalid,
+            errors=summary.errors,
+            elapsed_total=elapsed_total,
+            entity_type="Empresas",
+        )
 
-            def _on_company_validated(idx: int, r):
-                info = r.info
-                log_sunat_item(
-                    document_number=r.ruc,
-                    document_type="RUC",
-                    name=company_name_map.get(r.ruc, r.ruc),
-                    index=idx,
-                    total=len(rucs),
-                    success=r.success,
-                    elapsed=r.elapsed,
-                    status=info.status if info else None,
-                    condition=info.condition if info else None,
-                    is_valid=info.is_valid if info else False,
-                    error=r.error,
-                )
+        results_map = {r.ruc: r for r in summary.results}
+        for company in st.session_state.companies:
+            result = results_map.get(company["ruc"])
+            if result:
+                _sync_company_from_result(company, result)
 
-            with st.spinner(f"Consultando {len(rucs)} empresa(s) en SUNAT…"):
-                summary = validate_ruc_batch(rucs, on_item_validated=_on_company_validated)
-
-            elapsed_total = _time.perf_counter() - t_total_start
-            finish_sunat_validation(
-                total=summary.total,
-                valid=summary.valid,
-                invalid=summary.invalid,
-                errors=summary.errors,
-                elapsed_total=elapsed_total,
-                entity_type="Empresas",
-            )
-
-            results_map = {r.ruc: r for r in summary.results}
-            for company in st.session_state.companies:
-                result = results_map.get(company["ruc"])
-                if result:
-                    _sync_company_from_result(company, result)
-
-            updated = _persist_sunat_results(results_map)
-            _show_batch_summary(summary, db_updated=updated)
-            st.rerun()
-
-    with col_info:
-        if already_valid > 0:
-            st.caption(f"✅ {already_valid}/{len(companies)} empresa(s) validadas en SUNAT.")
+        updated = _persist_sunat_results(results_map)
+        _show_batch_summary(summary, db_updated=updated)
+        st.rerun()
 
     st.divider()
 
