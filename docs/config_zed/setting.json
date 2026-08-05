@@ -1,0 +1,41 @@
+{
+  "cli_default_open_behavior": "existing_window",
+  "agent": {
+    "default_profile": "write",
+    "default_model": {
+      "effort": "low",
+      "provider": "zed.dev",
+      "model": "claude-sonnet-4-6",
+      "enable_thinking": true
+    },
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "vim_mode": false,
+  "agent_servers": {
+    "cursor": {
+      "type": "registry"
+    }
+  },
+  "base_keymap": "VSCode",
+  "icon_theme": "JetBrains New UI Icons (Dark)",
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "dark",
+    "light": "Ayu Light",
+    "dark": "Tokyo Night"
+  },
+  "languages": {
+    "Python": {
+      "formatter": {
+        "language_server": {
+          "name": "ruff"
+        }
+      },
+      "language_servers": ["pyright", "ruff"]
+    }
+  },
+
+  "format_on_save": "on"
+}

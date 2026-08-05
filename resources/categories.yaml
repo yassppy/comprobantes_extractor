@@ -1,0 +1,274 @@
+# =============================================================================
+# Catálogo de categorías contables
+# Empresa: Venta de repuestos y accesorios para motos, bicicletas y vehículos
+# =============================================================================
+# Formato de cada entrada:
+#   - code:        Clave primaria única (máx. 20 caracteres). NO modificar una vez
+#                  asignado a comprobantes existentes en la BD.
+#   - name:        Nombre descriptivo (máx. 150 caracteres).
+#   - description: Detalle opcional para orientar la clasificación automática.
+#
+# Reglas de sincronización (REQ-6):
+#   - Nueva categoría  → se crea en la BD.
+#   - Categoría eliminada de este archivo → se marca como inactiva en la BD.
+#   - Cambio de name/description → se actualiza en la BD.
+# =============================================================================
+
+categories:
+
+  # ── Lubricantes y fluidos ───────────────────────────────────────────────────
+  - code: LUBRIC_ACEITE
+    name: Aceites y Lubricantes
+    description: >
+      Aceites de motor, aceites de transmisión, lubricantes multiusos,
+      grasas y fluidos para motos, bicicletas y vehículos en general.
+      Ejemplos: aceite 20W-50, aceite 4T, aceite de horquilla.
+
+  - code: LUBRIC_FLUID
+    name: Fluidos y Líquidos
+    description: >
+      Líquido de frenos, refrigerante, agua destilada, limpiadores
+      de carburador, desengrasantes y aditivos para motor.
+
+  # ── Transmisión ─────────────────────────────────────────────────────────────
+  - code: TRANS_FAJA
+    name: Fajas y Bandas de Transmisión
+    description: >
+      Fajas de transmisión para motos scooter, bandas de motor,
+      correas de variador y bandas de distribución.
+      Ejemplos: FAJA MOTO SCOOTER, BANDA MOTOR, códigos como 835-20-30-8.5.
+
+  - code: TRANS_CADENA
+    name: Cadenas y Piñones
+    description: >
+      Cadenas de transmisión, piñones delanteros y traseros,
+      coronas, kits de arrastre para motos y bicicletas.
+
+  - code: TRANS_VARIAT
+    name: Variador y Embrague
+    description: >
+      Variadores de velocidad, rodillos de variador, campanas de embrague,
+      discos de embrague, resortes y kits de embrague para scooters.
+
+  # ── Frenos ──────────────────────────────────────────────────────────────────
+  - code: FRENOS_PAST
+    name: Pastillas de Freno
+    description: >
+      Pastillas de freno delanteras y traseras para motos, scooters
+      y bicicletas. Frenos de disco y frenos de tambor.
+
+  - code: FRENOS_ZAPATA
+    name: Zapatas de Freno
+    description: >
+      Zapatas y bandas de freno para tambor en motos y bicicletas.
+
+  - code: FRENOS_DISCO
+    name: Discos de Freno
+    description: >
+      Discos de freno delanteros y traseros para motos y scooters.
+
+  - code: FRENOS_MANG
+    name: Mangueras y Cables de Freno
+    description: >
+      Mangueras de freno hidráulico, cables de freno mecánico,
+      latiguillos y accesorios de frenos.
+
+  # ── Motor y combustión ──────────────────────────────────────────────────────
+  - code: MOTOR_PISTON
+    name: Pistones y Cilindros
+    description: >
+      Pistones, cilindros, aros de pistón, kits de cilindro,
+      juntas de culata y empaquetaduras para motores de motos.
+
+  - code: MOTOR_VALVUL
+    name: Válvulas y Culata
+    description: >
+      Válvulas de admisión y escape, resortes de válvulas,
+      retenes, sellos y componentes de culata.
+
+  - code: MOTOR_CARB
+    name: Carburador y Partes
+    description: >
+      Carburadores completos, kits de reparación de carburador,
+      surtidores, flotadores, membranas y agujas de carburador.
+
+  - code: MOTOR_FILTRO
+    name: Filtros
+    description: >
+      Filtros de aire, filtros de aceite, filtros de combustible
+      y filtros de habitáculo para motos y vehículos.
+
+  - code: MOTOR_BUJIA
+    name: Bujías
+    description: >
+      Bujías de encendido para motos, scooters y vehículos en general.
+
+  - code: MOTOR_ESCAPE
+    name: Escape y Silenciador
+    description: >
+      Tubos de escape, silenciadores, colectores, juntas de escape
+      y soportes para motos y scooters.
+
+  # ── Suspensión ──────────────────────────────────────────────────────────────
+  - code: SUSP_AMORT
+    name: Amortiguadores
+    description: >
+      Amortiguadores traseros y delanteros (horquillas), muelles,
+      topes de goma y kits de reparación de suspensión.
+
+  - code: SUSP_HORQ
+    name: Horquilla y Dirección
+    description: >
+      Horquillas telescópicas, retenedores de aceite de horquilla,
+      bujes de dirección, rodamientos de dirección y manubrios.
+
+  # ── Ruedas y neumáticos ─────────────────────────────────────────────────────
+  - code: RUEDA_LLANTA
+    name: Llantas y Neumáticos
+    description: >
+      Llantas sin cámara, neumáticos con cámara, neumáticos para moto,
+      scooter, bicicleta y vehículo liviano.
+
+  - code: RUEDA_ARO
+    name: Aros y Rayos
+    description: >
+      Aros de rueda, rayos, niples, bujes delanteros y traseros,
+      kits de radios para motos y bicicletas.
+
+  - code: RUEDA_CAMARA
+    name: Cámaras de Aire
+    description: >
+      Cámaras de aire para motos, scooters y bicicletas,
+      válvulas de inflado y parches.
+
+  # ── Eléctrico ───────────────────────────────────────────────────────────────
+  - code: ELEC_BATERIA
+    name: Baterías
+    description: >
+      Baterías para motos, scooters y vehículos. Baterías de gel,
+      ácido-plomo y litio.
+
+  - code: ELEC_LUCES
+    name: Luces y Ópticas
+    description: >
+      Focos, ópticas delanteras, pilotos traseros, intermitentes,
+      luces LED, bombillas y kit de luces para motos y bicicletas.
+
+  - code: ELEC_ENCEND
+    name: Sistema de Encendido
+    description: >
+      Bobinas de encendido, CDI, reguladores de voltaje, condensadores,
+      platinos, sensores de árbol de levas y encendido electrónico.
+
+  - code: ELEC_CABLEADO
+    name: Cableado y Conectores
+    description: >
+      Arneses eléctricos, cables de bujía, conectores, fusibles,
+      interruptores y accesorios eléctricos en general.
+
+  # ── Carrocería y accesorios externos ────────────────────────────────────────
+  - code: CARR_PLASTICO
+    name: Plásticos y Carenados
+    description: >
+      Carenados, guardafangos, tapas laterales, cubiertas de asiento,
+      piezas de carrocería plástica para motos y scooters.
+
+  - code: CARR_ESPEJO
+    name: Espejos Retrovisores
+    description: >
+      Espejos retrovisores izquierdo y derecho para motos, scooters
+      y bicicletas. Incluye universales y originales.
+
+  - code: CARR_MANUBRIO
+    name: Manubrios y Puños
+    description: >
+      Manubrios, puños, grips, palancas de freno y embrague,
+      soportes y accesorios de manillar.
+
+  # ── Bicicleta ───────────────────────────────────────────────────────────────
+  - code: BCI_DESVIADOR
+    name: Desviadores y Cambios
+    description: >
+      Desviadores delanteros y traseros, palancas de cambio,
+      cables de cambio, fundas y cassettes para bicicletas.
+
+  - code: BCI_PEDALES
+    name: Pedales y Bielas
+    description: >
+      Pedales, bielas, platos, pedalier (caja de pedaleo),
+      kits de transmisión y accesorios de conducción para bicicletas.
+
+  - code: BCI_ACCES
+    name: Accesorios de Bicicleta
+    description: >
+      Timbres, candados, portabidones, alforjas, luces de bicicleta,
+      cascos, sillines y accesorios en general para bicicleta.
+
+  # ── Herramientas y taller ───────────────────────────────────────────────────
+  - code: HERRAM_TALLER
+    name: Herramientas de Taller
+    description: >
+      Llaves, destornilladores, extractor de ruedas, compresor,
+      torquímetros y herramientas especiales para servicio técnico de motos.
+
+  # ── Gastos operativos del negocio ───────────────────────────────────────────
+  - code: GASTO_SERV
+    name: Servicios Básicos
+    description: >
+      Agua, luz, teléfono, internet y servicios de telecomunicaciones
+      del local comercial.
+
+  - code: GASTO_ALQUIL
+    name: Alquiler de Local
+    description: >
+      Arrendamiento del local, almacén u oficina del negocio.
+
+  - code: GASTO_TRANSP
+    name: Transporte y Fletes
+    description: >
+      Fletes, courier, transporte de mercadería desde proveedores
+      y distribución a clientes.
+
+  - code: GASTO_PLANILLA
+    name: Planilla y Personal
+    description: >
+      Sueldos, gratificaciones, CTS, ESSALUD y ONP del personal
+      del negocio.
+
+  - code: GASTO_CONTAB
+    name: Honorarios Contables
+    description: >
+      Honorarios del contador externo, asesor tributario
+      o servicios de contabilidad tercerizada.
+
+  - code: GASTO_PUBLICI
+    name: Publicidad y Marketing
+    description: >
+      Impresión de catálogos, banners, publicidad en redes sociales,
+      diseño gráfico y material promocional.
+
+  # ── Ventas ──────────────────────────────────────────────────────────────────
+  - code: VENTA_REPUEST
+    name: Venta de Repuestos
+    description: >
+      Ingresos por venta de repuestos, partes y componentes
+      para motos, scooters, bicicletas y vehículos en general.
+
+  - code: VENTA_ACCES
+    name: Venta de Accesorios
+    description: >
+      Ingresos por venta de accesorios, equipamiento y productos
+      complementarios para ciclismo y motociclismo.
+
+  - code: VENTA_SERV_TEC
+    name: Servicio Técnico
+    description: >
+      Ingresos por mano de obra, diagnóstico y mantenimiento
+      en taller de motos y bicicletas.
+
+  # ── Sin clasificar ──────────────────────────────────────────────────────────
+  - code: OTROS
+    name: Otros / Sin Clasificar
+    description: >
+      Comprobantes que no encajan en ninguna categoría anterior.
+      Revisar manualmente para reclasificar.
