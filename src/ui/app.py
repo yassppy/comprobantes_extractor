@@ -1,5 +1,7 @@
 """Aplicación principal de Streamlit para el Extractor de Comprobantes."""
 
+import logging
+
 import streamlit as st
 
 from ui.components.company_manager import render_company_manager
@@ -10,6 +12,35 @@ from ui.components.summary_card import render_summary_card
 from ui.components.toolbar import render_toolbar
 from ui.state import AppState
 
+logger = logging.getLogger(__name__)
+
+
+@st.cache_resource(show_spinner=False)
+def _run_category_sync() -> None:
+    """
+    Sincroniza las categorías YAML → PostgreSQL una sola vez por sesión
+    de servidor (REQ-6 R1).
+
+    El decorador @st.cache_resource garantiza que la función se ejecute
+    una única vez aunque múltiples usuarios recarguen la app.
+    """
+    from use_cases.sync_categories import sync_categories
+
+    result = sync_categories()
+
+    if not result.success:
+        logger.warning(
+            "Sincronización de categorías completó con errores: %s",
+            result.errors,
+        )
+    else:
+        logger.info(
+            "Categorías sincronizadas — creadas: %d, actualizadas: %d, desactivadas: %d",
+            result.created,
+            result.updated,
+            result.deactivated,
+        )
+
 
 def main() -> None:
     st.set_page_config(
@@ -18,6 +49,9 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
+
+    # REQ-6 R1: sincronizar categorías al iniciar la aplicación
+    _run_category_sync()
 
     AppState.initialize()
 
