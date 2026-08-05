@@ -177,3 +177,84 @@ def search_documents(
     rows = conn.execute(query_sql, exec_params).fetchall()
 
     return rows, total_count
+
+
+def export_documents(
+    conn: psycopg.Connection,
+    company_id: int,
+    search_query: str | None = None,
+    document_type: str | None = None,
+    year: int | None = None,
+    month: int | None = None,
+) -> list[dict[str, Any]]:
+    """
+    Retorna TODOS los documentos (sin paginación) para exportar a Excel (REQ-10).
+    Incluye empresa, categoría y socio de negocio.
+
+    Args:
+        company_id:    Empresa obligatoria (REQ-10 requiere empresa seleccionada).
+        search_query:  Búsqueda textual opcional.
+        document_type: 'PURCHASE' | 'SALE' | None (todos).
+        year:          Año de emisión (REQ-10 R1: exportar por período).
+        month:         Mes de emisión.
+
+    Returns:
+        Lista de dicts con todos los campos necesarios para el Excel (REQ-10 R3).
+    """
+    where_clauses: list[str] = ["d.company_id = %s"]
+    params: list[Any] = [company_id]
+
+    if document_type and document_type != "ALL":
+        where_clauses.append("d.document_type = %s")
+        params.append(document_type)
+
+    if year:
+        where_clauses.append("EXTRACT(YEAR FROM d.issue_date) = %s")
+        params.append(year)
+
+    if month:
+        where_clauses.append("EXTRACT(MONTH FROM d.issue_date) = %s")
+        params.append(month)
+
+    if search_query and search_query.strip():
+        q = f"%{search_query.strip()}%"
+        where_clauses.append(
+            "(d.series ILIKE %s OR d.number ILIKE %s OR "
+            "CONCAT(d.series, '-', d.number) ILIKE %s OR "
+            "bp.document_number ILIKE %s OR bp.business_name ILIKE %s OR "
+            "d.file_name ILIKE %s)"
+        )
+        params.extend([q, q, q, q, q, q])
+
+    where_sql = " AND ".join(where_clauses)
+
+    query_sql = f"""
+        SELECT
+            d.id,
+            co.business_name        AS empresa,
+            co.ruc                  AS empresa_ruc,
+            d.document_type,
+            d.invoice_type,
+            d.series,
+            d.number,
+            d.issue_date,
+            d.currency,
+            d.subtotal,
+            d.igv,
+            d.total,
+            d.description,
+            d.status,
+            d.ocr_engine,
+            bp.document_number      AS partner_doc,
+            bp.business_name        AS partner_name,
+            bp.document_type        AS partner_doc_type,
+            d.category_code,
+            cat.name                AS category_name
+        FROM documents d
+        LEFT JOIN business_partners bp  ON d.business_partner_id = bp.id
+        LEFT JOIN companies co          ON d.company_id = co.id
+        LEFT JOIN categories cat        ON d.category_code = cat.code
+        WHERE {where_sql}
+        ORDER BY d.issue_date ASC NULLS LAST, d.id ASC
+    """  # noqa: S608
+    return conn.execute(query_sql, params).fetchall()

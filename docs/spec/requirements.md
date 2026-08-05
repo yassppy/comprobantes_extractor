@@ -220,6 +220,17 @@ THEN SYSTEM SHALL dejar la categoría sin asignar.
 
 ---
 
+#### R4
+
+---
+
+
+WHEN el contador seleccione un mes
+
+THEN SYSTEM SHALL exportar únicamente los comprobantes correspondientes a dicho período y va a generar un xlsx.
+
+---
+
 ## REQ-6: Gestión de categorías
 
 ### Historia de usuario:
@@ -299,161 +310,3 @@ WHEN el comprobante ya exista según su hash
 THEN SYSTEM SHALL evitar almacenarlo nuevamente.
 
 ---
-
-## REQ-8: Historial de procesamiento
-
-### Historia de usuario:
-
-Como contador
-
-quiero consultar el historial de procesamiento
-
-para conocer el resultado de cada ejecución.
-
-### Feature name:
-
-```text
-feature/HU08-processing-history
-```
-
-### Criterios de aceptación (EARS):
-
-#### R1
-
----
-
-WHEN una ejecución finalice
-
-THEN SYSTEM SHALL registrar fecha, duración, cantidad de comprobantes procesados y errores.
-
-#### R2
-
----
-
-WHEN existan errores
-
-THEN SYSTEM SHALL registrar el estado de la ejecución como FAILED.
-
----
-
-## REQ-9: Corrección manual
-
-### Historia de usuario:
-
-Como contador
-
-quiero modificar la categoría asignada
-
-para corregir clasificaciones incorrectas.
-
-### Feature name:
-
-```text
-feature/HU09-manual-correction
-```
-
-### Criterios de aceptación (EARS):
-
-#### R1
-
----
-
-WHEN el contador cambie una categoría
-
-THEN SYSTEM SHALL registrar la nueva categoría.
-
-#### R2
-
----
-
-WHEN una categoría sea modificada
-
-THEN SYSTEM SHALL mantener el historial de la corrección.
-
----
-
-## REQ-10: Exportación a Excel
-
-### Historia de usuario:
-
-Como contador
-
-quiero exportar los comprobantes procesados
-
-para utilizarlos en mis procesos contables.
-
-### Feature name:
-
-```text
-feature/HU10-export-excel
-```
-
-### Criterios de aceptación (EARS):
-
-#### R1
-
----
-
-WHEN el contador seleccione un mes
-
-THEN SYSTEM SHALL exportar únicamente los comprobantes correspondientes a dicho período.
-
-#### R2
-
----
-
-WHEN la exportación finalice
-
-THEN SYSTEM SHALL generar un archivo Excel (.xlsx).
-
-#### R3
-
----
-
-WHEN el archivo sea generado
-
-THEN SYSTEM SHALL incluir empresa, fecha, serie, número, proveedor, cliente, subtotal, IGV, total, código de categoría y nombre de categoría.
-
----
-
-## REQ-11: Visualización del procesamiento
-
-### Historia de usuario:
-
-Como contador
-
-quiero visualizar el progreso del procesamiento
-
-para conocer el estado de la ejecución en tiempo real.
-
-### Feature name:
-
-```text
-feature/HU11-processing-monitor
-```
-
-### Criterios de aceptación (EARS):
-
-#### R1
-
----
-
-WHEN el procesamiento esté en ejecución
-
-THEN SYSTEM SHALL mostrar el progreso en la interfaz de Streamlit.
-
-#### R2
-
----
-
-WHEN exista información de seguimiento
-
-THEN SYSTEM SHALL registrar el detalle del procesamiento utilizando Rich en consola.
-
-#### R3
-
----
-
-WHEN el procesamiento finalice
-
-THEN SYSTEM SHALL mostrar un resumen general de la ejecución.
